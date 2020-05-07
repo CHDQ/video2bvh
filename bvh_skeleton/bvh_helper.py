@@ -4,11 +4,11 @@ from pathlib import Path
 
 class BvhNode(object):
     def __init__(
-        self, name, offset, rotation_order,
-        children=None, parent=None, is_root=False, is_end_site=False
+            self, name, offset, rotation_order,
+            children=None, parent=None, is_root=False, is_end_site=False
     ):
         if not is_end_site and \
-          rotation_order not in ['xyz', 'xzy', 'yxz', 'yzx', 'zxy', 'zyx']:
+                rotation_order not in ['xyz', 'xzy', 'yxz', 'yzx', 'zxy', 'zyx']:
             raise ValueError(f'Rotation order invalid.')
         self.name = name
         self.offset = offset
@@ -17,7 +17,7 @@ class BvhNode(object):
         self.parent = parent
         self.is_root = is_root
         self.is_end_site = is_end_site
-    
+
 
 class BvhHeader(object):
     def __init__(self, root, nodes):
@@ -52,23 +52,23 @@ def write_header(writer, node, level):
             for axis in node.rotation_order
         ])
         writer.write(channel_line + '\n')
-    
+
     for child in node.children:
         write_header(writer, child, level + 1)
-    
+
     indent = ' ' * 4 * level
     writer.write(f'{indent}{"}"}\n')
 
 
-def write_bvh(output_file, header, channels, frame_rate=30):
+def write_bvh(output_file, header, channels, frame_rate=60):
     output_file = Path(output_file)
     if not output_file.parent.exists():
         os.makedirs(output_file.parent)
-    
+
     with output_file.open('w') as f:
         f.write('HIERARCHY\n')
         write_header(writer=f, node=header.root, level=0)
-        
+
         f.write('MOTION\n')
         f.write(f'Frames: {len(channels)}\n')
         f.write(f'Frame Time: {1 / frame_rate}\n')
