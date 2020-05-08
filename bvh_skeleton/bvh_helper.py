@@ -70,8 +70,13 @@ def write_bvh(output_file, header, channels, frame_rate=60):
         write_header(writer=f, node=header.root, level=0)
 
         f.write('MOTION\n')
-        f.write(f'Frames: {len(channels)}\n')
+        f.write(f'Frames: {len(channels) + 1}\n')
         f.write(f'Frame Time: {1 / frame_rate}\n')
-
+        first_line = [0 for x in range(len(channels[0]))]
+        first_line[4] = -90
+        first_line[0] = channels[0][0]
+        first_line[1] = channels[0][1]
+        first_line[2] = channels[0][2]
+        f.write(' '.join([f'{element}' for element in first_line]) + '\n')
         for channel in channels:
             f.write(' '.join([f'{element}' for element in channel]) + '\n')

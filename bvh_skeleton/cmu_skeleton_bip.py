@@ -273,9 +273,9 @@ class CMUSkeleton(object):
         return channel
 
     def poses2bvh(self, poses_3d, header=None, output_file=None):
+        poses_3d = poses_3d * 0.1
         if not header:
             header = self.get_bvh_header(poses_3d)
-
         channels = []
         for frame, pose in enumerate(poses_3d):
             channels.append(self.pose2euler(pose, header))

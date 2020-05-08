@@ -3,6 +3,7 @@
 ! left to right rotation matrix multiply: v'=vR
 ! non-standard quaternion multiply
 """
+import math
 
 import numpy as np
 
@@ -15,7 +16,7 @@ def dcm_from_axis(x_dir, y_dir, z_dir, order):
     assert order in ['yzx', 'yxz', 'xyz', 'xzy', 'zxy', 'zyx']
 
     axis = {'x': x_dir, 'y': y_dir, 'z': z_dir}
-    name = ['x', 'y', 'z']    
+    name = ['x', 'y', 'z']
     idx0 = name.index(order[0])
     idx1 = name.index(order[1])
     idx2 = name.index(order[2])
@@ -23,7 +24,7 @@ def dcm_from_axis(x_dir, y_dir, z_dir, order):
     axis[order[0]] = normalize(axis[order[0]])
     axis[order[1]] = normalize(np.cross(
         axis[name[(idx1 + 1) % 3]], axis[name[(idx1 + 2) % 3]]
-    ))   
+    ))
     axis[order[2]] = normalize(np.cross(
         axis[name[(idx2 + 1) % 3]], axis[name[(idx2 + 2) % 3]]
     ))
@@ -143,3 +144,19 @@ def quat2euler(q, order='zxy', eps=1e-8):
         raise ValueError('Not implemented')
 
     return np.reshape(euler, original_shape)
+
+
+def euler2quat(r, p, y):
+    sinp = math.sin(math.radians(p / 2))
+    siny = math.sin(math.radians(y / 2))
+    sinr = math.sin(math.radians(r / 2))
+
+    cosp = math.cos(math.radians(p / 2))
+    cosy = math.cos(math.radians(y / 2))
+    cosr = math.cos(math.radians(r / 2))
+
+    w = cosr * cosp * cosy + sinr * sinp * siny
+    x = sinr * cosp * cosy - cosr * sinp * siny
+    y = cosr * sinp * cosy + sinr * cosp * siny
+    z = cosr * cosp * siny - sinr * sinp * cosy
+    return np.array([w, x, y, z])

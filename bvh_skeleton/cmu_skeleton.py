@@ -74,7 +74,7 @@ class CMUSkeleton(object):
         for parent, children in self.children.items():
             for child in children:
                 self.parent[child] = parent
-                
+
         self.left_joints = [
             joint for joint in self.keypoint2index
             if 'Left' in joint
@@ -114,7 +114,6 @@ class CMUSkeleton(object):
             'RightFoot': [0, 0, -1],
             'RightFootEndSite': [0, -1, 0]
         }
-
 
     def get_initial_offset(self, poses_3d):
         # TODO: RANSAC
@@ -157,7 +156,6 @@ class CMUSkeleton(object):
 
         return initial_offset
 
-
     def get_bvh_header(self, poses_3d):
         initial_offset = self.get_initial_offset(poses_3d)
 
@@ -180,7 +178,6 @@ class CMUSkeleton(object):
         header = bvh_helper.BvhHeader(root=nodes[self.root], nodes=nodes)
         return header
 
-
     def pose2euler(self, pose, header):
         channel = []
         quats = {}
@@ -190,7 +187,7 @@ class CMUSkeleton(object):
             node = stack.pop()
             joint = node.name
             joint_idx = self.keypoint2index[joint]
-            
+
             if node.is_root:
                 channel.extend(pose[joint_idx])
 
@@ -220,7 +217,7 @@ class CMUSkeleton(object):
                 order = 'zyx'
             elif joint == 'Spine1':
                 x_dir = pose[index['LeftArm']] - \
-                    pose[index['RightArm']]
+                        pose[index['RightArm']]
                 y_dir = None
                 z_dir = pose[joint_idx] - pose[index['Spine']]
                 order = 'zyx'
@@ -249,25 +246,30 @@ class CMUSkeleton(object):
                 y_dir = pose[joint_idx] - pose[index['RightArm']]
                 z_dir = None
                 order = 'xzy'
-            
+
             if order:
                 dcm = math3d.dcm_from_axis(x_dir, y_dir, z_dir, order)
                 quats[joint] = math3d.dcm2quat(dcm)
             else:
                 quats[joint] = quats[self.parent[joint]].copy()
-            
+
             local_quat = quats[joint].copy()
             if node.parent:
                 local_quat = math3d.quat_divide(
                     q=quats[joint], r=quats[node.parent.name]
                 )
-            
+            if joint == 'Hips':
+                local_quat = math3d.quat_mul(math3d.euler2quat(-90, 0, 0), local_quat)
             euler = math3d.quat2euler(
                 q=local_quat, order=node.rotation_order
             )
             euler = np.rad2deg(euler)
             eulers[joint] = euler
-            channel.extend(euler)
+            # channel.extend(euler)
+
+            channel.append(euler[0])
+            channel.append(euler[1])
+            channel.append(euler[2])
 
             for child in node.children[::-1]:
                 if not child.is_end_site:
@@ -275,8 +277,8 @@ class CMUSkeleton(object):
 
         return channel
 
-
     def poses2bvh(self, poses_3d, header=None, output_file=None):
+        poses_3d = poses_3d * 0.1
         if not header:
             header = self.get_bvh_header(poses_3d)
 
@@ -286,5 +288,5 @@ class CMUSkeleton(object):
 
         if output_file:
             bvh_helper.write_bvh(output_file, header, channels)
-        
+
         return channels, header
