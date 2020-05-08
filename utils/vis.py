@@ -4,16 +4,17 @@ import cv2
 import numpy as np
 import os
 from pathlib import Path
+import matplotlib
 
+matplotlib.rcParams['animation.embed_limit'] = 2 ** 128
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d
 from matplotlib.animation import FuncAnimation, writers
 
 
 def vis_2d_keypoints(
-    keypoints, img, skeleton, kp_thresh,
-    alpha=0.7, output_file=None, show_name=False):
-
+        keypoints, img, skeleton, kp_thresh,
+        alpha=0.7, output_file=None, show_name=False):
     # Convert from plt 0-1 RGBA colors to 0-255 BGR colors for opencv.
     cmap = plt.get_cmap('rainbow')
     colors = [cmap(i) for i in np.linspace(0, 1, skeleton.keypoint_num)]
@@ -36,14 +37,14 @@ def vis_2d_keypoints(
                             0.5, (0, 255, 0))
         for child in skeleton.children[parent]:
             if child not in skeleton.keypoint2index or \
-              skeleton.keypoint2index[child] < 0:
+                    skeleton.keypoint2index[child] < 0:
                 continue
             stack.append(child)
             c_idx = skeleton.keypoint2index[child]
             c_pos = int(keypoints[c_idx, 0]), int(keypoints[c_idx, 1])
             c_score = keypoints[c_idx, 2] if kp_thresh else None
             if kp_thresh is None or \
-              (p_score > kp_thresh and c_score > kp_thresh):
+                    (p_score > kp_thresh and c_score > kp_thresh):
                 cv2.line(
                     mask, p_pos, c_pos,
                     color=colors[c_idx], thickness=2, lineType=cv2.LINE_AA)
@@ -58,7 +59,7 @@ def vis_2d_keypoints(
     return vis_result
 
 
-def vis_3d_keypoints( keypoints, skeleton, azimuth, elev=15): 
+def vis_3d_keypoints(keypoints, skeleton, azimuth, elev=15):
     x_max, x_min = np.max(keypoints[:, 0]), np.min(keypoints[:, 0])
     y_max, y_min = np.max(keypoints[:, 1]), np.min(keypoints[:, 1])
     z_max, z_min = np.max(keypoints[:, 2]), np.min(keypoints[:, 2])
@@ -100,8 +101,8 @@ def vis_3d_keypoints( keypoints, skeleton, azimuth, elev=15):
 
 
 def vis_3d_keypoints_sequence(
-    keypoints_sequence, skeleton, azimuth,
-    fps=30, elev=15, output_file=None
+        keypoints_sequence, skeleton, azimuth,
+        fps=30, elev=15, output_file=None
 ):
     kps_sequence = keypoints_sequence
     x_max, x_min = np.max(kps_sequence[:, :, 0]), np.min(kps_sequence[:, :, 0])
@@ -171,7 +172,7 @@ def vis_3d_keypoints_sequence(
                         color = 'k'
                     lines[line_idx][0].set_xdata([p_pos[0], c_pos[0]])
                     lines[line_idx][0].set_ydata([p_pos[1], c_pos[1]])
-                    lines[line_idx][0].set_3d_properties( [p_pos[2], c_pos[2]]) 
+                    lines[line_idx][0].set_3d_properties([p_pos[2], c_pos[2]])
                     line_idx += 1
 
     anim = FuncAnimation(

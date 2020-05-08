@@ -2,13 +2,14 @@ import h5py
 import numpy as np
 from pathlib import Path
 
+
 def load_camera_params(file):
     cam_file = Path(file)
     cam_params = {}
     azimuth = {
         '54138969': 70, '55011271': -70, '58860488': 110, '60457274': -100
     }
-    with h5py.File(cam_file) as f:
+    with h5py.File(cam_file, "r") as f:
         subjects = [1, 5, 6, 7, 8, 9, 11]
         for s in subjects:
             cam_params[f'S{s}'] = {}
@@ -24,7 +25,7 @@ def load_camera_params(file):
                 val['p'] = np.array(params['p'])
                 val['azimuth'] = azimuth[name]
                 cam_params[f'S{s}'][name] = val
-    
+
     return cam_params
 
 
@@ -36,7 +37,7 @@ def world2camera(pose, R, T):
         T: numyp array with shape (3, 1)
     """
     assert pose.shape[-1] == 3
-    original_shape = pose.shape 
+    original_shape = pose.shape
     pose_world = pose.copy().reshape((-1, 3)).T
     pose_cam = np.matmul(R.T, pose_world - T)
     pose_cam = pose_cam.T.reshape(original_shape)

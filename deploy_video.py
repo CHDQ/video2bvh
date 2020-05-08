@@ -14,6 +14,7 @@ def run(openpose_dir: str, input_video, out_put_dir):
     from pathlib import Path
     from IPython.display import HTML
 
+
     e2d = openpose_estimator.OpenPoseEstimator(
         model_folder=f'{openpose_dir}/models/')  # set model_folder to /path/to/openpose/models
 
