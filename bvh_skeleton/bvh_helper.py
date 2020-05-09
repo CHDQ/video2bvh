@@ -41,7 +41,7 @@ def write_header(writer, node, level):
     indent = ' ' * 4 * (level + 1)
     writer.write(
         f'{indent}OFFSET '
-        f'{node.offset[0]} {node.offset[1]} {node.offset[2]}\n'
+        f'{node.offset[0]} {node.offset[2]} {node.offset[1]}\n'
     )
     if channel_num:
         channel_line = f'{indent}CHANNELS {channel_num} '
@@ -77,6 +77,6 @@ def write_bvh(output_file, header, channels, frame_rate=60):
         first_line[0] = channels[0][0]
         first_line[1] = channels[0][1]
         first_line[2] = channels[0][2]
-        f.write(' '.join([f'{element}' for element in first_line]) + '\n')
+        f.write(' '.join([f'0' for element in first_line]) + '\n')
         for channel in channels:
             f.write(' '.join([f'{element}' for element in channel]) + '\n')

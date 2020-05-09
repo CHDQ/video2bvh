@@ -246,8 +246,16 @@ class CMUSkeleton(object):
                 y_dir = pose[joint_idx] - pose[index['RightArm']]
                 z_dir = None
                 order = 'xzy'
-
+            # 转y轴朝上
+            x_dir = None if x_dir is None else [x_dir[0], x_dir[2], x_dir[1]]
+            temp = None if y_dir is None else [y_dir[0], y_dir[2], y_dir[1]]
+            z_dir = None if z_dir is None else [z_dir[0], z_dir[2], z_dir[1]]
+            y_dir = z_dir
+            z_dir = temp
             if order:
+                order = order.replace('y', 't')
+                order = order.replace('z', 'y')
+                order = order.replace('t', 'z')
                 dcm = math3d.dcm_from_axis(x_dir, y_dir, z_dir, order)
                 quats[joint] = math3d.dcm2quat(dcm)
             else:
@@ -258,8 +266,8 @@ class CMUSkeleton(object):
                 local_quat = math3d.quat_divide(
                     q=quats[joint], r=quats[node.parent.name]
                 )
-            if joint == 'Hips':
-                local_quat = math3d.quat_mul(math3d.euler2quat(-90, 0, 0), local_quat)
+            # if joint == 'Hips':
+            #     local_quat = math3d.quat_mul(math3d.euler2quat(-90, 0, 0), local_quat)
             euler = math3d.quat2euler(
                 q=local_quat, order=node.rotation_order
             )
